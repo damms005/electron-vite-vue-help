@@ -1,8 +1,9 @@
-import { app, BrowserWindow, shell, ipcMain } from 'electron'
+import { app, BrowserWindow, shell, ipcMain, dialog } from 'electron'
 import { createRequire } from 'node:module'
 import { fileURLToPath } from 'node:url'
-import path from 'node:path'
+import path, { join } from 'node:path'
 import os from 'node:os'
+import { readFileSync, writeFileSync } from 'node:fs'
 
 const require = createRequire(import.meta.url)
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
@@ -118,3 +119,15 @@ ipcMain.handle('open-win', (_, arg) => {
     childWindow.loadFile(indexHtml, { hash: arg })
   }
 })
+
+
+ipcMain.handle('ask-and-write-base64', (event, base64: string) => {
+  const folder = dialog.showOpenDialogSync(BrowserWindow.getAllWindows()[0], { properties: ['openDirectory'] })
+
+  const destination = join(folder[0], 'sample.png')
+  writeFileSync(`${destination}`, base64, { encoding: 'base64' });
+
+  return destination
+})
+
+ipcMain.handle('get-file-content-as-base64', (event, path: string) => readFileSync(path))

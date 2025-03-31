@@ -34,5 +34,10 @@
     "vite-plugin-electron-renderer": "^0.14.5",
     "vue": "^3.4.21",
     "vue-tsc": "^2.0.6"
+  },
+  "dependencies": {
+    "sequelize": "^6.37.7",
+    "sharp": "^0.33.5",
+    "sqlite3": "^5.1.7"
   }
 }
