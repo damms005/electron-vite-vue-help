@@ -10,6 +10,6 @@ export interface IApp {
 
 declare global {
 	interface Window {
-		app: IApp
+		customAppApi: IApp
 	}
 }

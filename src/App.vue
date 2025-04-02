@@ -38,7 +38,7 @@ function convert() {
     srcOriginal.value = URL.createObjectURL(inputBox.value.files[0]);
 
     const thumbnailPreview = await window.customAppApi.makeThumbnail(
-      event.target.result as ArrayBuffer
+      event.target?.result as ArrayBuffer
     );
 
     srcConverted.value = URL.createObjectURL(new Blob([thumbnailPreview]));
