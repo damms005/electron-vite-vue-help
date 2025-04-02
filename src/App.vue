@@ -37,12 +37,15 @@ function convert() {
   reader.onload = async (event) => {
     srcOriginal.value = URL.createObjectURL(inputBox.value.files[0]);
 
-    const thumbnailPreview = await window.app.makeThumbnail(
+    const thumbnailPreview = await window.customAppApi.makeThumbnail(
       event.target.result as ArrayBuffer
     );
 
     srcConverted.value = URL.createObjectURL(new Blob([thumbnailPreview]));
-    users.value = await window.app.storeUser(firtsName.value, lastName.value);
+    users.value = await window.customAppApi.storeUser(
+      firtsName.value,
+      lastName.value
+    );
   };
 
   reader.readAsArrayBuffer(inputBox.value.files[0]);

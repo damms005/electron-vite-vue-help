@@ -5,7 +5,6 @@ import path, { join } from 'node:path'
 import os from 'node:os'
 import { readFileSync, writeFileSync } from 'node:fs'
 
-const require = createRequire(import.meta.url)
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
 // The built directory structure
@@ -40,7 +39,7 @@ if (!app.requestSingleInstanceLock()) {
 }
 
 let win: BrowserWindow | null = null
-const preload = path.join(__dirname, '../preload/index.mjs')
+const preload = path.join(__dirname, '../preload/index.js')
 const indexHtml = path.join(RENDERER_DIST, 'index.html')
 
 async function createWindow() {
@@ -49,12 +48,7 @@ async function createWindow() {
     icon: path.join(process.env.VITE_PUBLIC, 'favicon.ico'),
     webPreferences: {
       preload,
-      // Warning: Enable nodeIntegration and disable contextIsolation is not secure in production
-      // nodeIntegration: true,
-
-      // Consider using contextBridge.exposeInMainWorld
-      // Read more on https://www.electronjs.org/docs/latest/tutorial/context-isolation
-      // contextIsolation: false,
+      sandbox: false,
     },
   })
 
@@ -65,18 +59,6 @@ async function createWindow() {
   } else {
     win.loadFile(indexHtml)
   }
-
-  // Test actively push message to the Electron-Renderer
-  win.webContents.on('did-finish-load', () => {
-    win?.webContents.send('main-process-message', new Date().toLocaleString())
-  })
-
-  // Make all links open with the browser, not with the application
-  win.webContents.setWindowOpenHandler(({ url }) => {
-    if (url.startsWith('https:')) shell.openExternal(url)
-    return { action: 'deny' }
-  })
-  // win.webContents.on('will-navigate', (event, url) => { }) #344
 }
 
 app.whenReady().then(createWindow)
@@ -84,14 +66,6 @@ app.whenReady().then(createWindow)
 app.on('window-all-closed', () => {
   win = null
   if (process.platform !== 'darwin') app.quit()
-})
-
-app.on('second-instance', () => {
-  if (win) {
-    // Focus on the main window if the user tried to open another
-    if (win.isMinimized()) win.restore()
-    win.focus()
-  }
 })
 
 app.on('activate', () => {
@@ -102,24 +76,6 @@ app.on('activate', () => {
     createWindow()
   }
 })
-
-// New window example arg: new windows url
-ipcMain.handle('open-win', (_, arg) => {
-  const childWindow = new BrowserWindow({
-    webPreferences: {
-      preload,
-      nodeIntegration: true,
-      contextIsolation: false,
-    },
-  })
-
-  if (VITE_DEV_SERVER_URL) {
-    childWindow.loadURL(`${VITE_DEV_SERVER_URL}#${arg}`)
-  } else {
-    childWindow.loadFile(indexHtml, { hash: arg })
-  }
-})
-
 
 ipcMain.handle('ask-and-write-base64', (event, base64: string) => {
   const folder = dialog.showOpenDialogSync(BrowserWindow.getAllWindows()[0], { properties: ['openDirectory'] })

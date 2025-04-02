@@ -24,7 +24,7 @@ async function makeThumbnail(picture: ArrayBuffer): Promise<string> {
 	return await ipcRenderer.invoke('get-file-content-as-base64', destinationPath)
 }
 
-contextBridge.exposeInMainWorld('app', {
+contextBridge.exposeInMainWorld('customAppApi', {
 	makeThumbnail: async (picture: ArrayBuffer) => await makeThumbnail(picture),
 	storeUser: async (firstName: string, lastName: string) => {
 		await User.sync({ force: true });
